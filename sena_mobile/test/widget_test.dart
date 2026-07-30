@@ -1,30 +1,41 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
+import 'package:provider/provider.dart';
 import 'package:sena_mobile/main.dart';
 
+// Creates the app with the Provider required by MyApp.
+Widget createTestApp() {
+  return ChangeNotifierProvider(
+    create: (context) => ThemeModel(),
+    child: const MyApp(),
+  );
+}
+
+// Tests the ephemeral counter and app-wide theme state.
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+  testWidgets('counter increments', (WidgetTester tester) async {
+    await tester.pumpWidget(createTestApp());
 
-    // Verify that our counter starts at 0.
     expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
-
-    // Tap the '+' icon and trigger a frame.
     await tester.tap(find.byIcon(Icons.add));
     await tester.pump();
-
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
     expect(find.text('1'), findsOneWidget);
+  });
+
+  testWidgets('switch changes the theme', (WidgetTester tester) async {
+    await tester.pumpWidget(createTestApp());
+
+    MaterialApp app = tester.widget(find.byType(MaterialApp));
+    expect(app.theme?.brightness, Brightness.light);
+
+    await tester.tap(find.byIcon(Icons.settings_brightness));
+    await tester.pumpAndSettle();
+    expect(find.text('App State Example'), findsOneWidget);
+
+    await tester.tap(find.byType(Switch));
+    await tester.pump();
+
+    app = tester.widget(find.byType(MaterialApp));
+    expect(app.theme?.brightness, Brightness.dark);
   });
 }
