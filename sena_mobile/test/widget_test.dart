@@ -1,41 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:provider/provider.dart';
 import 'package:sena_mobile/main.dart';
 
-// Creates the app with the Provider required by MyApp.
-Widget createTestApp() {
-  return ChangeNotifierProvider(
-    create: (context) => ThemeModel(),
-    child: const MyApp(),
-  );
-}
-
-// Tests the ephemeral counter and app-wide theme state.
 void main() {
-  testWidgets('counter increments', (WidgetTester tester) async {
-    await tester.pumpWidget(createTestApp());
-
-    expect(find.text('0'), findsOneWidget);
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
-    expect(find.text('1'), findsOneWidget);
-  });
-
-  testWidgets('switch changes the theme', (WidgetTester tester) async {
-    await tester.pumpWidget(createTestApp());
-
-    MaterialApp app = tester.widget(find.byType(MaterialApp));
-    expect(app.theme?.brightness, Brightness.light);
-
-    await tester.tap(find.byIcon(Icons.settings_brightness));
+  testWidgets('starts on the SENA home screen', (tester) async {
+    await tester.pumpWidget(const SenaMobileApp());
     await tester.pumpAndSettle();
-    expect(find.text('App State Example'), findsOneWidget);
 
-    await tester.tap(find.byType(Switch));
-    await tester.pump();
+    expect(find.text('Home'), findsOneWidget);
 
-    app = tester.widget(find.byType(MaterialApp));
-    expect(app.theme?.brightness, Brightness.dark);
+    final app = tester.widget<MaterialApp>(find.byType(MaterialApp));
+    expect(app.title, 'SENA Mobile');
+    expect(app.initialRoute, '/home');
   });
 }

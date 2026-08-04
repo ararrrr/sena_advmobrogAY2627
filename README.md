@@ -1,6 +1,30 @@
-# sena_mobile
+# SENA Advanced Mobile Programming
 
-A new Flutter project.
+Flutter laboratory activities are located in the `sena_mobile` project.
+
+## Lab Activity 2: Discussion
+
+The application follows a layered design pattern that separates API data,
+business logic, and presentation. `Product` and its related model classes define
+the structure of data returned by the endpoint and convert JSON values into
+null-safe Dart objects. `ProductService` is responsible for requesting the
+DummyJSON `/products` endpoint, checking the HTTP response, decoding its JSON,
+and returning a `Future<List<Product>>` to the interface.
+
+`ProductScreen` calls the service once during initialization and uses a
+`FutureBuilder` to render loading, error, empty, and successful states. When data
+is available, the screen filters it using the search query and displays the
+matching products in a responsive grid. Selecting a card passes its `Product`
+object to `ProductDetailsScreen`, where additional model fields are rendered.
+This flow keeps networking out of the widgets and makes each layer easier to
+read, test, and change independently.
+
+Provider supplies `ThemeProvider` above the entire application. The settings
+screen updates that shared state using `toggleTheme()`, `notifyListeners()`
+rebuilds listening widgets, and `MaterialApp` switches between light and dark
+themes. This demonstrates how the provider pattern manages application-wide
+state separately from the local search and navigation state owned by individual
+screens.
 
 ## Getting Started
 
