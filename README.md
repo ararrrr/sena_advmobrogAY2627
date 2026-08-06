@@ -1,9 +1,4 @@
 ## Lab Activity 2: Discussion
 
-This Flutter project uses the DummyJSON API to display a list of products. The
-model stores the product data, the service handles the API request, and the
-screen displays the result using `FutureBuilder`.
+The application uses a model to store the product information received from the API, while the service retrieves the data and converts the JSON response into Product objects so it can be used in the application. After the data is processed, FutureBuilder waits for the result before displaying the products on the screen, making sure that the information is loaded correctly before it appears to the user. With the project divided into models, services, screens, providers, and widgets, each part has a specific responsibility, making the code easier to read, organize, and maintain instead of placing everything in a single file.
 
-I added a search bar, a product details page, and a dark/light mode switch using
-Provider. Separating the models, services, screens, providers, and widgets made
-the project easier for me to understand and organize.
