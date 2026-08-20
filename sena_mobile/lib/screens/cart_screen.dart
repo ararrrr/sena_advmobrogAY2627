@@ -8,23 +8,23 @@ import '../widgets/custom_text.dart';
 import 'product_details_screen.dart';
 
 class CartScreen extends StatefulWidget {
-  const CartScreen({super.key});
+  const CartScreen({super.key, required this.userId});
+
+  final int userId;
 
   @override
   State<CartScreen> createState() => _CartScreenState();
 }
 
 class _CartScreenState extends State<CartScreen> {
-  static const int _userId = 5;
-
   late final Future<Cart?> _cartFuture;
   final Map<int, int> _quantities = {};
 
   @override
   void initState() {
     super.initState();
-    // Enhancement 3: Render only the cart belonging to user ID 5.
-    _cartFuture = CartService().getCartByUser(_userId);
+    // Enhancement 3: Render the cart using the saved authenticated user ID.
+    _cartFuture = CartService().getCartByUser(widget.userId);
   }
 
   @override

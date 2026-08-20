@@ -5,8 +5,11 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 
 import 'providers/theme_provider.dart';
+import 'models/user.dart';
 import 'screens/home_screen.dart';
 import 'screens/settings_screen.dart';
+import 'screens/signin_screen.dart';
+import 'screens/splash_screen.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -40,9 +43,17 @@ class SenaMobileApp extends StatelessWidget {
             darkTheme: ThemeData.dark(),
             themeMode:
                 themeProvider.isDark ? ThemeMode.dark : ThemeMode.light,
-            initialRoute: '/home',
+            initialRoute: '/splash',
             routes: {
-              '/home': (context) => const HomeScreen(),
+              '/splash': (context) => const SplashScreen(),
+              '/signin': (context) => const SignInScreen(),
+              '/home': (context) {
+                final arguments = ModalRoute.of(context)?.settings.arguments;
+                final userData = arguments is Map<String, dynamic>
+                    ? arguments
+                    : const <String, dynamic>{};
+                return HomeScreen(user: User.fromJson(userData));
+              },
               '/settings': (context) => const SettingsScreen(),
             },
           );

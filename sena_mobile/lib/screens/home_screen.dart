@@ -1,15 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import '../models/user.dart';
 import '../widgets/custom_text.dart';
 import 'cart_screen.dart';
 import 'chat_screen.dart';
 import 'product_screen.dart';
+import 'profile_screen.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key, this.username = ''});
+  const HomeScreen({super.key, required this.user});
 
-  final String username;
+  final User user;
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -48,10 +50,11 @@ class _HomeScreenState extends State<HomeScreen> {
           onPageChanged: (page) {
             setState(() => _selectedIndex = page);
           },
-          children: const [
-            ProductScreen(),
-            CartScreen(),
-            Center(child: Text('Profile')),
+          children: [
+            const ProductScreen(),
+            // Enhancement 3: Use the saved user's ID to load their cart.
+            CartScreen(userId: widget.user.id),
+            ProfileScreen(user: widget.user),
           ],
         ),
         // Enhancement 2: Chat is now a floating button and is hidden on Cart.
@@ -106,7 +109,11 @@ class _HomeScreenState extends State<HomeScreen> {
     }
 
     return CustomText(
-      text: _selectedIndex == 1 ? 'Cart' : 'Profile',
+      text: _selectedIndex == 1
+          ? 'Cart'
+          : (widget.user.firstName.isEmpty
+              ? 'Profile'
+              : widget.user.firstName),
       fontSize: 20.sp,
       color: Theme.of(context).colorScheme.primary,
       fontWeight: FontWeight.w600,

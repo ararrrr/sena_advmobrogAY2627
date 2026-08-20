@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../models/product_model.dart';
 import '../services/cart_service.dart';
+import '../services/user_service.dart';
 import '../widgets/custom_text.dart';
 
 class ProductDetailsScreen extends StatefulWidget {
@@ -18,7 +19,6 @@ class ProductDetailsScreen extends StatefulWidget {
 }
 
 class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
-  static const int _userId = 5;
   bool _isAddingToCart = false;
 
   @override
@@ -125,8 +125,9 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
     setState(() => _isAddingToCart = true);
 
     try {
+      final user = await UserService().getUser();
       final cart = await CartService().addToCart(
-        userId: _userId,
+        userId: user.id,
         productId: widget.product.id,
       );
       if (!mounted) return;
