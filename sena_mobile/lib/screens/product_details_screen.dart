@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../models/product_model.dart';
+import '../services/cart_service.dart';
 import '../widgets/custom_text.dart';
 
-class ProductDetailsScreen extends StatelessWidget {
+class ProductDetailsScreen extends StatefulWidget {
   const ProductDetailsScreen({
     super.key,
     required this.product,
@@ -13,7 +14,17 @@ class ProductDetailsScreen extends StatelessWidget {
   final Product product;
 
   @override
+  State<ProductDetailsScreen> createState() => _ProductDetailsScreenState();
+}
+
+class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
+  static const int _userId = 5;
+  bool _isAddingToCart = false;
+
+  @override
   Widget build(BuildContext context) {
+    final product = widget.product;
+
     return Scaffold(
       appBar: AppBar(title: const Text('Product Details')),
       body: SingleChildScrollView(
@@ -87,10 +98,54 @@ class ProductDetailsScreen extends StatelessWidget {
                     .toList(),
               ),
             ],
+            SizedBox(height: 20.h),
+            // Enhancement 3: Pass the selected product to /carts/add.
+            SizedBox(
+              width: double.infinity,
+              child: FilledButton.icon(
+                onPressed: _isAddingToCart ? null : _addToCart,
+                icon: _isAddingToCart
+                    ? SizedBox.square(
+                        dimension: 18.r,
+                        child: const CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Icon(Icons.add_shopping_cart),
+                label: Text(
+                  _isAddingToCart ? 'Adding...' : 'Add to Cart',
+                ),
+              ),
+            ),
           ],
         ),
       ),
     );
+  }
+
+  Future<void> _addToCart() async {
+    setState(() => _isAddingToCart = true);
+
+    try {
+      final cart = await CartService().addToCart(
+        userId: _userId,
+        productId: widget.product.id,
+      );
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            '${widget.product.title} added to simulated cart ${cart.id}.',
+          ),
+        ),
+      );
+    } catch (error) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Unable to add product: $error')),
+      );
+    } finally {
+      if (mounted) setState(() => _isAddingToCart = false);
+    }
   }
 }
 
