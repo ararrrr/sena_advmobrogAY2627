@@ -1,13 +1,11 @@
-# Laboratory Activities
+# 1 Laboratory Discussion
 
-## Lab Act 1
+SetState is useful for managing small and temporary changes within a single widget or screen. For example, it can update a counter whenever the user presses a button. It is simple and easy to use, but it can become difficult to manage when many widgets need the same data. Provider is better for managing data shared across different widgets or pages. For example, changing the app’s theme through Provider updates every page that uses that theme. It also helps keep the state-management code more organized as the application becomes larger.
 
-Lab Act 1 introduced the basic structure of a Flutter mobile application and the use of reusable widgets. The activity focused on arranging interface elements with widgets such as `Scaffold`, `AppBar`, `Column`, `Row`, and `ListView`. Assets, colors, text styles, and spacing were combined to create a clear and consistent layout. Separating sections of the interface into widgets made the source code easier to understand and maintain. This activity established the Flutter fundamentals needed for the succeeding laboratory exercises.
+# 2 Laboratory Discussion
 
-## Lab Act 2
+The application uses a model to store the product information received from the API, while the service retrieves the data and converts the JSON response into Product objects so it can be used in the application. After the data is processed, FutureBuilder waits for the result before displaying the products on the screen, making sure that the information is loaded correctly before it appears to the user. With the project divided into models, services, screens, providers, and widgets, each part has a specific responsibility, making the code easier to read, organize, and maintain instead of placing everything in a single file.
 
-Lab Act 2 introduced models and services for retrieving structured information from an API. The model defines the fields used by the application and converts JSON responses into Dart objects. The service is responsible for sending the request, checking the response, and returning the converted model data. A `FutureBuilder` waits for the asynchronous operation before displaying loading, error, or completed states on the screen. This separation gives models, services, and screens clear responsibilities and makes the project easier to maintain.
+# 3 Laboratory Discussion
 
-## Lab Act 3
-
-Lab Act 3 expanded the application by organizing additional features into dedicated screens, providers, and reusable widgets. Providers manage shared state and notify listening screens whenever application data changes. Screens focus on presenting the current state, while reusable widgets keep repeated interface elements consistent. Navigation connects the different pages without combining unrelated responsibilities in one file. This activity demonstrated how organized state management and reusable components support a larger Flutter application.
+The Cart Model, service, and screen work together to get and display the cart information. The Cart Model holds the data, while the service gets the information from the API. After receiving the data, the screen uses it to show the correct cart details in detail_screen.dart. The updated design pattern separates the project into models, services, screens, providers, and widgets. Each part has its own purpose, which keeps the code organized and makes it easier to find and change specific parts of the project. For getById, the cart ID is included in the API request so it only gets the information for a specific cart instead of getting all carts. The returned data is stored in the Cart Model and then shown on the detail screen.
