@@ -1,5 +1,3 @@
-# Laboratory Activities
+# 1 Laboratory Discussion
 
-## Lab Act 1
-
-Lab Act 1 introduced the basic structure of a Flutter mobile application and the use of reusable widgets. The activity focused on arranging interface elements with widgets such as `Scaffold`, `AppBar`, `Column`, `Row`, and `ListView`. Assets, colors, text styles, and spacing were combined to create a clear and consistent layout. Separating sections of the interface into widgets made the source code easier to understand and maintain. This activity established the Flutter fundamentals needed for the succeeding laboratory exercises.
+SetState is useful for managing small and temporary changes within a single widget or screen. For example, it can update a counter whenever the user presses a button. It is simple and easy to use, but it can become difficult to manage when many widgets need the same data. Provider is better for managing data shared across different widgets or pages. For example, changing the app’s theme through Provider updates every page that uses that theme. It also helps keep the state-management code more organized as the application becomes larger.
