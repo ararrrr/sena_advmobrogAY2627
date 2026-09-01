@@ -1,4 +1,9 @@
-## Lab Activity 2: Discussion
+# Laboratory Activities
 
-The application uses a model to store the product information received from the API, while the service retrieves the data and converts the JSON response into Product objects so it can be used in the application. After the data is processed, FutureBuilder waits for the result before displaying the products on the screen, making sure that the information is loaded correctly before it appears to the user. With the project divided into models, services, screens, providers, and widgets, each part has a specific responsibility, making the code easier to read, organize, and maintain instead of placing everything in a single file.
+## Lab Act 1
 
+Lab Act 1 introduced the basic structure of a Flutter mobile application and the use of reusable widgets. The activity focused on arranging interface elements with widgets such as `Scaffold`, `AppBar`, `Column`, `Row`, and `ListView`. Assets, colors, text styles, and spacing were combined to create a clear and consistent layout. Separating sections of the interface into widgets made the source code easier to understand and maintain. This activity established the Flutter fundamentals needed for the succeeding laboratory exercises.
+
+## Lab Act 2
+
+Lab Act 2 introduced models and services for retrieving structured information from an API. The model defines the fields used by the application and converts JSON responses into Dart objects. The service is responsible for sending the request, checking the response, and returning the converted model data. A `FutureBuilder` waits for the asynchronous operation before displaying loading, error, or completed states on the screen. This separation gives models, services, and screens clear responsibilities and makes the project easier to maintain.
