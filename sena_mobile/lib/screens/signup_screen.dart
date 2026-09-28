@@ -262,6 +262,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
         } catch (_) {}
 
         await _userService.saveUserData({
+          'uid': firebaseUser.uid,
           'id': 1,
           'username': username,
           'email': email,

@@ -186,6 +186,7 @@ class _SignInScreenState extends State<SignInScreen> {
         if (fbUser != null) {
           final username = fbUser.displayName ?? fbUser.email?.split('@').first ?? 'Firebase User';
           await _userService.saveUserData({
+            'uid': fbUser.uid,
             'id': 1,
             'username': username,
             'email': fbUser.email ?? '',

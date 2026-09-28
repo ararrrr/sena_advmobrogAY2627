@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -11,6 +12,8 @@ import '../models/user.dart' as model;
 ValueNotifier<UserService> userService = ValueNotifier(UserService());
 
 class UserService {
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
   Future<Map<String, dynamic>> loginUser(
     String username,
     String password,
@@ -68,9 +71,31 @@ class UserService {
           '',
     );
     await preferences.setString(
+      'uid',
+      (userData['uid'] as String?) ?? currentUser?.uid ?? '',
+    );
+    await preferences.setString(
       'refreshToken',
       userData['refreshToken'] as String? ?? '',
     );
+
+    // Sync to Firestore Users collection if authenticated
+    final uid = preferences.getString('uid') ?? currentUser?.uid ?? '';
+    if (uid.isNotEmpty) {
+      final email = preferences.getString('email') ?? '';
+      final firstName = preferences.getString('firstName') ?? '';
+      if (email.isNotEmpty || firstName.isNotEmpty) {
+        try {
+          await _firestore.collection('Users').doc(uid).set({
+            'uid': uid,
+            'email': email,
+            'firstName': firstName.isNotEmpty ? firstName : email.split('@').first,
+            'lastName': preferences.getString('lastName') ?? '',
+            'username': preferences.getString('username') ?? '',
+          }, SetOptions(merge: true));
+        } catch (_) {}
+      }
+    }
   }
 
   Future<Map<String, dynamic>> getUserData() async {
@@ -78,6 +103,7 @@ class UserService {
 
     return {
       'id': preferences.getInt('id') ?? 0,
+      'uid': preferences.getString('uid') ?? currentUser?.uid ?? '',
       'username': preferences.getString('username') ?? '',
       'email': preferences.getString('email') ?? '',
       'firstName': preferences.getString('firstName') ?? '',
@@ -155,8 +181,28 @@ class UserService {
       password: password,
     );
 
+    final uid = currentUser?.uid;
+
     await currentUser!.reauthenticateWithCredential(credential);
     await currentUser!.delete();
+
+    // Delete user from Firestore Users collection
+    if (uid != null && uid.isNotEmpty) {
+      try {
+        await _firestore.collection('Users').doc(uid).delete();
+      } catch (_) {}
+    }
+
+    try {
+      final q = await _firestore
+          .collection('Users')
+          .where('email', isEqualTo: email)
+          .get();
+      for (final doc in q.docs) {
+        await doc.reference.delete();
+      }
+    } catch (_) {}
+
     await logout();
   }
 
