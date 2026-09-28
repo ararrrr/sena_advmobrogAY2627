@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "754439049589",
+    "project_id": "advmobprog-firebase-6d376",
+    "storage_bucket": "advmobprog-firebase-6d376.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:754439049589:android:aaaf2662f4543382c1433c",
+        "android_client_info": {
+          "package_name": "com.example.sena_mobile"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC8UUCbJ54GAVcSv6rzcJLT-M3nnU45YOc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

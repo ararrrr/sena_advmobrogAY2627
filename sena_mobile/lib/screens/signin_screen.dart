@@ -12,23 +12,26 @@ class SignInScreen extends StatefulWidget {
 
 class _SignInScreenState extends State<SignInScreen> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  final TextEditingController _usernameController = TextEditingController();
+  final TextEditingController _identifierController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final UserService _userService = UserService();
 
   bool _isLoading = false;
   bool _hidePassword = true;
+  String _authMethod = 'Firebase'; // 'Firebase' or 'DummyJSON'
 
   @override
   void dispose() {
-    _usernameController.dispose();
+    _identifierController.dispose();
     _passwordController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    // Enhancement 2: Custom sign-in UI connected to UserService.
+    // Enhancement 2: Custom sign-in UI connected to DummyJSON and Firebase Auth.
+    final isFirebase = _authMethod == 'Firebase';
+
     return Scaffold(
       body: SafeArea(
         child: Center(
@@ -54,17 +57,56 @@ class _SignInScreenState extends State<SignInScreen> {
                       ),
                     ],
                   ),
-                  SizedBox(height: 42.h),
+                  SizedBox(height: 24.h),
+                  // Segmented switch between Firebase Auth and DummyJSON
+                  SegmentedButton<String>(
+                    segments: const [
+                      ButtonSegment(
+                        value: 'Firebase',
+                        label: Text('Firebase Auth'),
+                        icon: Icon(Icons.local_fire_department),
+                      ),
+                      ButtonSegment(
+                        value: 'DummyJSON',
+                        label: Text('DummyJSON'),
+                        icon: Icon(Icons.api),
+                      ),
+                    ],
+                    selected: {_authMethod},
+                    onSelectionChanged: (set) {
+                      setState(() {
+                        _authMethod = set.first;
+                        _formKey.currentState?.reset();
+                      });
+                    },
+                  ),
+                  SizedBox(height: 28.h),
                   TextFormField(
-                    controller: _usernameController,
+                    controller: _identifierController,
+                    keyboardType: isFirebase
+                        ? TextInputType.emailAddress
+                        : TextInputType.text,
                     textInputAction: TextInputAction.next,
-                    decoration: const InputDecoration(
-                      labelText: 'Username',
-                      border: OutlineInputBorder(),
+                    decoration: InputDecoration(
+                      labelText: isFirebase ? 'Email Address' : 'Username',
+                      hintText: isFirebase ? 'user@example.com' : 'e.g. emilys',
+                      border: const OutlineInputBorder(),
+                      prefixIcon: Icon(
+                        isFirebase ? Icons.email_outlined : Icons.person_outline,
+                      ),
                     ),
-                    validator: (value) => value == null || value.trim().isEmpty
-                        ? 'Enter your username'
-                        : null,
+                    validator: (value) {
+                      if (value == null || value.trim().isEmpty) {
+                        return isFirebase ? 'Enter your email' : 'Enter your username';
+                      }
+                      if (isFirebase) {
+                        final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+                        if (!emailRegex.hasMatch(value.trim())) {
+                          return 'Enter a valid email address';
+                        }
+                      }
+                      return null;
+                    },
                   ),
                   SizedBox(height: 16.h),
                   TextFormField(
@@ -76,6 +118,7 @@ class _SignInScreenState extends State<SignInScreen> {
                     decoration: InputDecoration(
                       labelText: 'Password',
                       border: const OutlineInputBorder(),
+                      prefixIcon: const Icon(Icons.lock_outline),
                       suffixIcon: IconButton(
                         tooltip: _hidePassword
                             ? 'Show password'
@@ -101,10 +144,23 @@ class _SignInScreenState extends State<SignInScreen> {
                       child: _isLoading
                           ? const SizedBox.square(
                               dimension: 20,
-                              child: CircularProgressIndicator(strokeWidth: 2),
+                              child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
                             )
-                          : const Text('Log In'),
+                          : Text('Log In with $_authMethod'),
                     ),
+                  ),
+                  SizedBox(height: 16.h),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Text("Don't have an account?"),
+                      TextButton(
+                        onPressed: () {
+                          Navigator.pushNamed(context, '/signup');
+                        },
+                        child: const Text('Sign Up'),
+                      ),
+                    ],
                   ),
                 ],
               ),
@@ -120,16 +176,47 @@ class _SignInScreenState extends State<SignInScreen> {
     setState(() => _isLoading = true);
 
     try {
-      final response = await _userService.loginUser(
-        _usernameController.text.trim(),
-        _passwordController.text,
-      );
-      if (!mounted) return;
-      Navigator.pushReplacementNamed(context, '/home', arguments: response);
+      if (_authMethod == 'Firebase') {
+        // Sign in via Firebase Auth
+        final credential = await _userService.signIn(
+          email: _identifierController.text.trim(),
+          password: _passwordController.text,
+        );
+        final fbUser = credential.user;
+        if (fbUser != null) {
+          final username = fbUser.displayName ?? fbUser.email?.split('@').first ?? 'Firebase User';
+          await _userService.saveUserData({
+            'id': 1,
+            'username': username,
+            'email': fbUser.email ?? '',
+            'firstName': username,
+            'lastName': '',
+            'gender': 'N/A',
+            'image': fbUser.photoURL ?? '',
+            'accessToken': await fbUser.getIdToken() ?? 'firebase_token',
+            'refreshToken': fbUser.refreshToken ?? '',
+            'loginType': 'firebase',
+          });
+        }
+        final userData = await _userService.getUserData();
+        if (!mounted) return;
+        Navigator.pushReplacementNamed(context, '/home', arguments: userData);
+      } else {
+        // Sign in via DummyJSON API
+        final response = await _userService.loginUser(
+          _identifierController.text.trim(),
+          _passwordController.text,
+        );
+        if (!mounted) return;
+        Navigator.pushReplacementNamed(context, '/home', arguments: response);
+      }
     } catch (error) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Login failed: $error')),
+        SnackBar(
+          content: Text('Login failed: $error'),
+          backgroundColor: Colors.red,
+        ),
       );
     } finally {
       if (mounted) setState(() => _isLoading = false);

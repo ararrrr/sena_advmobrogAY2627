@@ -1,10 +1,14 @@
 import 'dart:convert';
 
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../constants.dart';
-import '../models/user.dart';
+import '../models/user.dart' as model;
+
+ValueNotifier<UserService> userService = ValueNotifier(UserService());
 
 class UserService {
   Future<Map<String, dynamic>> loginUser(
@@ -86,8 +90,8 @@ class UserService {
   }
 
   // Enhancement 3: Recreate the saved user as a model for the UI.
-  Future<User> getUser() async {
-    return User.fromJson(await getUserData());
+  Future<model.User> getUser() async {
+    return model.User.fromJson(await getUserData());
   }
 
   Future<bool> isLoggedIn() async {
@@ -99,5 +103,74 @@ class UserService {
   Future<void> logout() async {
     final preferences = await SharedPreferences.getInstance();
     await preferences.clear();
+    try {
+      await firebaseAuth.signOut();
+    } catch (_) {}
+  }
+
+  // Firebase Authentication methods from Lab Activity
+  final FirebaseAuth firebaseAuth = FirebaseAuth.instance;
+
+  User? get currentUser => firebaseAuth.currentUser;
+
+  Stream<User?> get authStateChanges => firebaseAuth.authStateChanges();
+
+  Future<UserCredential> signIn({
+    required String email,
+    required String password,
+  }) async {
+    return await firebaseAuth.signInWithEmailAndPassword(
+      email: email,
+      password: password,
+    );
+  }
+
+  Future<UserCredential> createAccount({
+    required String email,
+    required String password,
+  }) async {
+    return await firebaseAuth.createUserWithEmailAndPassword(
+      email: email,
+      password: password,
+    );
+  }
+
+  Future<void> signOut() async {
+    await firebaseAuth.signOut();
+  }
+
+  Future<void> updateUsername({required String username}) async {
+    await currentUser!.updateDisplayName(username);
+    final preferences = await SharedPreferences.getInstance();
+    await preferences.setString('username', username);
+    await preferences.setString('firstName', username);
+  }
+
+  Future<void> deleteAccount({
+    required String email,
+    required String password,
+  }) async {
+    AuthCredential credential = EmailAuthProvider.credential(
+      email: email,
+      password: password,
+    );
+
+    await currentUser!.reauthenticateWithCredential(credential);
+    await currentUser!.delete();
+    await logout();
+  }
+
+  Future<void> resetPasswordFromCurrentPassword({
+    required String currentPassword,
+    required String newPassword,
+    required String email,
+  }) async {
+    AuthCredential credential = EmailAuthProvider.credential(
+      email: email,
+      password: currentPassword,
+    );
+
+    await currentUser!.reauthenticateWithCredential(credential);
+    await currentUser!.updatePassword(newPassword);
   }
 }

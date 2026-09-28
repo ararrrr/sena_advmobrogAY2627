@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 
 import '../providers/theme_provider.dart';
+import '../services/user_service.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -32,8 +33,51 @@ class SettingsScreen extends StatelessWidget {
               onChanged: (_) => themeProvider.toggleTheme(),
             ),
           ),
+          SizedBox(height: 12.h),
+          // Enhancement 3: Include Logout in settings -> back to login.
+          Card(
+            child: ListTile(
+              leading: const Icon(Icons.logout, color: Colors.red),
+              title: const Text(
+                'Log Out',
+                style: TextStyle(color: Colors.red, fontWeight: FontWeight.w600),
+              ),
+              subtitle: const Text('Sign out and return to login screen'),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () async {
+                final confirm = await showDialog<bool>(
+                  context: context,
+                  builder: (context) => AlertDialog(
+                    title: const Text('Log Out'),
+                    content: const Text('Are you sure you want to log out?'),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(context, false),
+                        child: const Text('Cancel'),
+                      ),
+                      FilledButton(
+                        onPressed: () => Navigator.pop(context, true),
+                        child: const Text('Log Out'),
+                      ),
+                    ],
+                  ),
+                );
+
+                if (confirm == true && context.mounted) {
+                  await UserService().logout();
+                  if (!context.mounted) return;
+                  Navigator.pushNamedAndRemoveUntil(
+                    context,
+                    '/signin',
+                    (_) => false,
+                  );
+                }
+              },
+            ),
+          ),
         ],
       ),
     );
   }
 }
+
